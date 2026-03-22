@@ -1,6 +1,6 @@
 // pages/cases.jsx
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/router'
+import { useRouter } from 'next/navigation'
 import Head from 'next/head'
 import { supabase, getUserCases, signOut } from '../lib/supabase'
 
