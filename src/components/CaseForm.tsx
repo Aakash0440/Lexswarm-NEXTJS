@@ -14,12 +14,13 @@ const EXAMPLES = [
 
 const STEPS = ['Classifying', 'Retrieving Law', 'Simulating Courtroom', 'Drafting Documents', 'Action Plan']
 const STEP_MSGS = [
+  'Waking up the API server…',
   'Classifying your case…',
   'Retrieving applicable statutes…',
   'Simulating courtroom outcomes…',
   'Drafting legal documents…',
-  'Building your action plan…',
 ]
+const STEPS_EXTENDED = [...STEPS, 'Building Plan']
 
 interface Props {
   onResult: (result: CaseResult) => void
@@ -117,7 +118,9 @@ export default function CaseForm({ onResult }: Props) {
             Describe your legal situation
           </label>
           <textarea
-            value={text}
+            id="case-description"
+          name="case-description"
+          value={text}
             onChange={e => setText(e.target.value)}
             rows={5}
             placeholder="e.g. My landlord changed the locks tonight and threw my belongings outside. I have nowhere to sleep. This is in Karachi, Pakistan."

@@ -45,12 +45,21 @@ export interface CaseResult {
   documents: Document[]
 }
 
+// Wake up Railway if sleeping, then analyze
 export async function analyzeCase(description: string): Promise<CaseResult> {
+  // Step 1: ping health first to wake Railway from sleep (5s timeout)
+  try {
+    await fetch(`${API_BASE}/health`, { signal: AbortSignal.timeout(8000) })
+  } catch {
+    // ignore — just waking it up
+  }
+
+  // Step 2: actual request with 60s timeout (Railway cold start can take 20-30s)
   const res = await fetch(`${API_BASE}/cases/analyze`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ description }),
-    signal: AbortSignal.timeout(15000),
+    signal: AbortSignal.timeout(60000),
   })
   if (!res.ok) throw new Error(`API error: ${res.status}`)
   return res.json()
@@ -58,7 +67,7 @@ export async function analyzeCase(description: string): Promise<CaseResult> {
 
 export async function checkHealth(): Promise<boolean> {
   try {
-    const res = await fetch(`${API_BASE}/health`, { signal: AbortSignal.timeout(5000) })
+    const res = await fetch(`${API_BASE}/health`, { signal: AbortSignal.timeout(8000) })
     return res.ok
   } catch {
     return false
