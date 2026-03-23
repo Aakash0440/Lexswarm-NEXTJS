@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Head from 'next/head'
-import { signUpEmail, signInEmail, signInGoogle, signInPhone, verifyOtp } from '../lib/supabase'
+import { signUpEmail, signInEmail, signInGoogle, signInPhone, verifyOtp } from '@/lib/supabase'
 
 export default function AuthPage() {
   const router = useRouter()
