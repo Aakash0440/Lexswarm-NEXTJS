@@ -46,7 +46,7 @@ export default function CasesPage() {
         <div>
           <p style={{ fontSize: 11, letterSpacing: '3px', color: '#c8a84b', marginBottom: 16 }}>CASE HISTORY</p>
           {cases.length === 0 && <p style={{ color: '#6b6050', fontSize: 13 }}>No cases yet.</p>}
-          {cases.map((c: any) => (
+          {cases.map((c) => (
             <div key={c.id} onClick={() => setSelected(c)}
               style={{ borderLeft: `2px solid ${selected?.id === c.id ? '#c8a84b' : 'rgba(200,168,75,0.2)'}`, padding: '12px 16px', marginBottom: 8, cursor: 'pointer', background: selected?.id === c.id ? 'rgba(200,168,75,0.05)' : 'transparent' }}>
               <div style={{ fontSize: 11, letterSpacing: '2px', color: '#c8a84b' }}>{c.case_type?.toUpperCase()} · {c.country}</div>
