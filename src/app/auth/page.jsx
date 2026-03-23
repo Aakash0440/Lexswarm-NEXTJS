@@ -1,18 +1,14 @@
-// pages/auth.jsx
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Head from 'next/head'
-import { signUpEmail, signInEmail, signInGoogle, signInPhone, verifyOtp } from '@/lib/supabase'
+import { signUpEmail, signInEmail, signInGoogle } from '@/lib/supabase'
 
 export default function AuthPage() {
   const router = useRouter()
   const [mode, setMode]         = useState('login')
-  const [step, setStep]         = useState(1)
   const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
-  const [phone, setPhone]       = useState('')
-  const [otp, setOtp]           = useState('')
   const [error, setError]       = useState('')
   const [loading, setLoading]   = useState(false)
 
@@ -34,24 +30,6 @@ export default function AuthPage() {
     catch (err) { setError(err.message) }
   }
 
-  async function handlePhone(e) {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
-    try { await signInPhone(phone); setStep(2) }
-    catch (err) { setError(err.message) }
-    finally { setLoading(false) }
-  }
-
-  async function handleOtp(e) {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
-    try { await verifyOtp(phone, otp); router.push('/cases') }
-    catch (err) { setError(err.message) }
-    finally { setLoading(false) }
-  }
-
   return (
     <>
       <Head>
@@ -70,7 +48,6 @@ export default function AuthPage() {
         }
         body{font-family:'DM Sans',sans-serif;background:var(--ink);color:var(--cream);min-height:100vh}
         @keyframes rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-        @keyframes fadeIn{from{opacity:0}to{opacity:1}}
         .grain{position:fixed;inset:0;pointer-events:none;z-index:1;
           background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='250' height='250'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='250' height='250' filter='url(%23n)' opacity='.06'/%3E%3C/svg%3E");opacity:.55}
         input{-webkit-font-smoothing:antialiased}
@@ -80,21 +57,17 @@ export default function AuthPage() {
       <div className="grain"/>
 
       <div style={s.page}>
-        {/* Decorative lines */}
         <div style={s.lineLeft}/>
         <div style={s.lineRight}/>
 
         <div style={s.card}>
-          {/* Corner ornaments */}
           {['ftl','ftr','fbl','fbr'].map(c => <div key={c} style={{...s.corner, ...s[c]}}/>)}
 
-          {/* Logo */}
           <div style={s.logo}>
             <div style={s.shield}>⚖</div>
             <span style={s.logoText}>LEX<span style={s.logoSub}>SWARM</span></span>
           </div>
 
-          {/* Ornamental rule */}
           <div style={s.ornRule}>
             <div style={s.rl}/>
             <div style={s.rd}/>
@@ -103,95 +76,53 @@ export default function AuthPage() {
 
           <div style={s.tagline}>Access your case history</div>
 
-          {/* Tabs */}
+          {/* Tabs — email only */}
           <div style={s.tabs}>
             {[
               {id:'login', label:'Sign In'},
               {id:'signup', label:'Register'},
-              {id:'phone', label:'Phone'},
             ].map(t => (
               <button key={t.id} style={{...s.tab, ...(mode===t.id ? s.tabOn : {})}}
-                onClick={() => { setMode(t.id); setStep(1); setError('') }}>
+                onClick={() => { setMode(t.id); setError('') }}>
                 {t.label}
               </button>
             ))}
           </div>
 
           {/* Google */}
-          {mode !== 'phone' && (
-            <button style={s.googleBtn} onClick={handleGoogle}>
-              <svg width="16" height="16" viewBox="0 0 24 24" style={{marginRight:10,flexShrink:0}}>
-                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-              </svg>
-              Continue with Google
-            </button>
-          )}
+          <button style={s.googleBtn} onClick={handleGoogle}>
+            <svg width="16" height="16" viewBox="0 0 24 24" style={{marginRight:10,flexShrink:0}}>
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+            </svg>
+            Continue with Google
+          </button>
 
-          {/* Divider */}
-          {mode !== 'phone' && (
-            <div style={s.divider}>
-              <div style={s.divLine}/>
-              <span style={s.divTxt}>or</span>
-              <div style={s.divLine}/>
+          <div style={s.divider}>
+            <div style={s.divLine}/>
+            <span style={s.divTxt}>or</span>
+            <div style={s.divLine}/>
+          </div>
+
+          <form onSubmit={handleEmail} style={s.form}>
+            <div style={s.fieldWrap}>
+              <label style={s.label}>Email Address</label>
+              <input style={s.input} type="email" value={email}
+                onChange={e => setEmail(e.target.value)}
+                placeholder="you@example.com" required/>
             </div>
-          )}
-
-          {/* Email form */}
-          {mode !== 'phone' && (
-            <form onSubmit={handleEmail} style={s.form}>
-              <div style={s.fieldWrap}>
-                <label style={s.label}>Email Address</label>
-                <input style={s.input} type="email" value={email}
-                  onChange={e => setEmail(e.target.value)}
-                  placeholder="you@example.com" required/>
-              </div>
-              <div style={s.fieldWrap}>
-                <label style={s.label}>Password</label>
-                <input style={s.input} type="password" value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  placeholder="••••••••" required/>
-              </div>
-              <button style={{...s.submitBtn, opacity: loading ? .7 : 1}} type="submit" disabled={loading}>
-                {loading ? 'Please wait…' : mode === 'login' ? 'Sign In' : 'Create Account'}
-              </button>
-            </form>
-          )}
-
-          {/* Phone step 1 */}
-          {mode === 'phone' && step === 1 && (
-            <form onSubmit={handlePhone} style={s.form}>
-              <div style={s.fieldWrap}>
-                <label style={s.label}>Phone Number</label>
-                <input style={s.input} type="tel" value={phone}
-                  onChange={e => setPhone(e.target.value)}
-                  placeholder="+92 300 0000000" required/>
-              </div>
-              <button style={{...s.submitBtn, opacity: loading ? .7 : 1}} type="submit" disabled={loading}>
-                {loading ? 'Sending…' : 'Send Verification Code'}
-              </button>
-            </form>
-          )}
-
-          {/* OTP step 2 */}
-          {mode === 'phone' && step === 2 && (
-            <form onSubmit={handleOtp} style={s.form}>
-              <div style={s.otpHint}>Code sent to {phone}</div>
-              <div style={s.fieldWrap}>
-                <label style={s.label}>Verification Code</label>
-                <input style={{...s.input, letterSpacing:'0.4em', textAlign:'center', fontSize:22, fontFamily:"'DM Mono',monospace"}}
-                  type="text" maxLength={6} value={otp}
-                  onChange={e => setOtp(e.target.value)}
-                  placeholder="000000" required/>
-              </div>
-              <button style={{...s.submitBtn, opacity: loading ? .7 : 1}} type="submit" disabled={loading}>
-                {loading ? 'Verifying…' : 'Verify & Sign In'}
-              </button>
-              <button type="button" style={s.backBtn} onClick={() => setStep(1)}>← Change number</button>
-            </form>
-          )}
+            <div style={s.fieldWrap}>
+              <label style={s.label}>Password</label>
+              <input style={s.input} type="password" value={password}
+                onChange={e => setPassword(e.target.value)}
+                placeholder="••••••••" required/>
+            </div>
+            <button style={{...s.submitBtn, opacity: loading ? .7 : 1}} type="submit" disabled={loading}>
+              {loading ? 'Please wait…' : mode === 'login' ? 'Sign In' : 'Create Account'}
+            </button>
+          </form>
 
           {error && (
             <div style={s.errorBox}>
@@ -200,7 +131,6 @@ export default function AuthPage() {
             </div>
           )}
 
-          {/* Bottom ornament */}
           <div style={s.ornRule}><div style={s.rl}/><div style={s.rd}/><div style={s.rl}/></div>
 
           <p style={s.footer}>
@@ -332,18 +262,6 @@ const s = {
     fontSize:12, letterSpacing:'2.5px',
     textTransform:'uppercase', fontWeight:600,
     marginTop:4, transition:'opacity .2s',
-  },
-  otpHint:{
-    fontFamily:"'Playfair Display',serif",
-    fontSize:13, color:'var(--cream3)',
-    fontStyle:'italic', textAlign:'center',
-  },
-  backBtn:{
-    background:'none', border:'none',
-    color:'var(--cream3)', fontSize:13,
-    fontFamily:"'DM Sans',sans-serif",
-    cursor:'pointer', textAlign:'center', padding:'4px 0',
-    fontStyle:'italic',
   },
   errorBox:{
     marginTop:14, padding:'12px 16px',
