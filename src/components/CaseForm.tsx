@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { analyzeCase, type CaseResult } from '@/lib/api'
+import { supabase, saveCase } from '@/lib/supabase'
 
 const EXAMPLES = [
   { label: 'PK Housing', text: 'My landlord changed the locks tonight and threw my belongings outside. I have nowhere to sleep. This is in Karachi, Pakistan.' },
@@ -20,7 +21,6 @@ const STEP_MSGS = [
   'Simulating courtroom outcomes…',
   'Drafting legal documents…',
 ]
-const STEPS_EXTENDED = [...STEPS, 'Building Plan']
 
 interface Props {
   onResult: (result: CaseResult) => void
@@ -47,6 +47,32 @@ export default function CaseForm({ onResult }: Props) {
 
     try {
       const result = await analyzeCase(text)
+
+      // Save to Supabase if user is logged in
+      try {
+        const { data: sessionData } = await supabase.auth.getSession()
+        if (sessionData?.session) {
+          await saveCase({
+            case_ref:        result.case_id,
+            case_type:       result.case_type,
+            urgency:         result.urgency,
+            country:         result.country,
+            language:        result.language || 'en',
+            description:     text,
+            legal_rights:    result.legal_rights || [],
+            action_plan:     result.recommended_actions || [],
+            documents:       result.documents || [],
+            simulation:      result.simulation || {},
+            win_probability: Math.round((result.simulation?.win_probability || 0.5) * 100),
+            lawyer_alerted:  result.human_volunteer_alerted || false,
+            flags:           {},
+          })
+        }
+      } catch (saveErr) {
+        // Don't block the user if saving fails — just log it
+        console.warn('Case save failed:', saveErr)
+      }
+
       onResult(result)
     } catch (e) {
       setError('Could not reach the LEXSWARM API. Please check your connection.')
@@ -119,8 +145,8 @@ export default function CaseForm({ onResult }: Props) {
           </label>
           <textarea
             id="case-description"
-          name="case-description"
-          value={text}
+            name="case-description"
+            value={text}
             onChange={e => setText(e.target.value)}
             rows={5}
             placeholder="e.g. My landlord changed the locks tonight and threw my belongings outside. I have nowhere to sleep. This is in Karachi, Pakistan."
