@@ -1,6 +1,7 @@
 // pages/auth.jsx
+'use client'
 import { useState } from 'react'
-import { useRouter } from 'next/router'
+import { useRouter } from 'next/navigation'
 import Head from 'next/head'
 import { signUpEmail, signInEmail, signInGoogle, signInPhone, verifyOtp } from '../lib/supabase'
 
