@@ -1,14 +1,16 @@
-// lib/supabase.js
-// Supabase client for frontend — uses anon key only
+'use client'
 
 import { createClient } from '@supabase/supabase-js'
 
-export const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-)
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-// ── Auth helpers ──────────────────────────────────────────────────────────────
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+  }
+})
 
 export async function signUpEmail(email, password) {
   const { data, error } = await supabase.auth.signUp({ email, password })
@@ -31,16 +33,13 @@ export async function signInGoogle() {
 }
 
 export async function signInPhone(phone) {
-  // Sends OTP SMS — phone format: +92XXXXXXXXXX
   const { error } = await supabase.auth.signInWithOtp({ phone })
   if (error) throw error
 }
 
 export async function verifyOtp(phone, token) {
   const { data, error } = await supabase.auth.verifyOtp({
-    phone,
-    token,
-    type: 'sms'
+    phone, token, type: 'sms'
   })
   if (error) throw error
   return data
@@ -49,13 +48,6 @@ export async function verifyOtp(phone, token) {
 export async function signOut() {
   await supabase.auth.signOut()
 }
-
-export async function getSession() {
-  const { data } = await supabase.auth.getSession()
-  return data.session
-}
-
-// ── Case log helpers ──────────────────────────────────────────────────────────
 
 export async function getUserCases() {
   const { data, error } = await supabase
